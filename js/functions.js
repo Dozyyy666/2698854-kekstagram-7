@@ -28,3 +28,22 @@ function extractDigits(str){
   }
   return digits === '' ? NaN : Number(digits);
 }
+
+function toMinutes(timeStr) {
+  //переводит в минуты
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+function checkMeeting (startWork, endWork, startMeeting, duration){
+  // переводим время в минуты
+  const workStartMin = toMinutes(startWork);
+  const workEndMin = toMinutes(endWork);
+  const meetingStartMin = toMinutes(startMeeting);
+
+  //время окончания встречи
+  const meetingEndMin = meetingStartMin + duration;
+
+  return meetingStartMin >= workStartMin && meetingEndMin <= workEndMin;
+}
+
