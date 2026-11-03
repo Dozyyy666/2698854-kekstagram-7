@@ -1,6 +1,9 @@
+// Точка входа в приложение
 import { generatePhotos } from './util.js';
-import { renderPictures } from './render-pictures.js';
+import { createGallery } from './gallery.js';
 
+// Генерируем массив фотографий
 const photos = generatePhotos();
 
-renderPictures(photos);
+// Создаём галерею с обработчиками клика
+createGallery(photos);
