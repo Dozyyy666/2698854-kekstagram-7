@@ -12,6 +12,9 @@ const closeButton = bigPicture.querySelector('.big-picture__cancel');
 //шаблон одного комментария из HTML
 const commentTemplate = document.querySelector('#social__comment').content;
 
+const COMMENTS_PER_PAGE = 5;
+let currentComments = [];
+let shownCommentsCount = 0;
 
 const createCommentElement = ({ avatar, name, message }) => {
   const commentElement = commentTemplate.cloneNode(true);
@@ -31,21 +34,31 @@ const clearComments = () => {
   socialComments.innerHTML = '';
 };
 
-const renderComments = (comments) => {
-  /*
-  Функция отрисовывает все комментарии фотографии в контейнер
-  Принимает массив объектов комментариев
-  */
-  clearComments();
+const updateCommentCounter = () => {
+  const shownSpan = socialCommentCount.querySelector('.social__comment-shown');
+  const totalSpan = socialCommentCount.querySelector('.comments-count');
+  shownSpan.textContent = shownCommentsCount;
+  totalSpan.textContent = currentComments.length;
+};
+
+const renderNextComments = () => {
+  const endIndex = Math.min(shownCommentsCount + COMMENTS_PER_PAGE, currentComments.length);
   const fragment = document.createDocumentFragment();
 
-  //каждый комментарий добавляется в фрагмент
-  comments.forEach((comment) => {
-    const commentElement = createCommentElement(comment);
+  for (let i = shownCommentsCount; i < endIndex; i++) {
+    const commentElement = createCommentElement(currentComments[i]);
     fragment.appendChild(commentElement);
-  });
+  }
 
   socialComments.appendChild(fragment);
+  shownCommentsCount = endIndex;
+
+  updateCommentCounter();
+
+  // Если показали все комментарии - прячем кнопку
+  if (shownCommentsCount >= currentComments.length) {
+    commentsLoader.classList.add('hidden');
+  }
 };
 
 const openBigPicture = (photo) => {
@@ -53,14 +66,16 @@ const openBigPicture = (photo) => {
   bigPictureImg.alt = photo.description;
 
   likesCount.textContent = photo.likes;
-  commentsCount.textContent = photo.comments.length;
-
   socialCaption.textContent = photo.description;
 
-  renderComments(photo.comments);
+  currentComments = photo.comments;
+  shownCommentsCount = 0;
+  clearComments();
+  renderNextComments();
 
-  socialCommentCount.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
+  // Показываем счетчик и кнопку (просто удаляем hidden а не добавляем)
+  socialCommentCount.classList.remove('hidden');
+  commentsLoader.classList.remove('hidden');
 
   bigPicture.classList.remove('hidden');
 
@@ -84,6 +99,10 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     closeBigPicture();
   }
+});
+
+commentsLoader.addEventListener('click', () => {
+  renderNextComments();
 });
 
 export { openBigPicture };
