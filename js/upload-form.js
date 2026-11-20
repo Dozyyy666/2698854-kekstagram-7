@@ -1,5 +1,6 @@
 // Модуль отвечает за работу с формой загрузки изображения:
 // открытие/закрытие, сброс полей и валидацию через Pristine
+import { resetEditor } from './image-editor.js';
 
 //элементы формы
 const uploadForm = document.querySelector('.img-upload__form');// сама форма
@@ -29,6 +30,9 @@ const closeUploadForm = () => {
   uploadInput.value = '';
   uploadOverlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
+
+  // Сбрасываем масштаб и эффекты
+  resetEditor();
 };
 
 //Обработчик Esc для document
