@@ -1,6 +1,8 @@
 // Модуль отвечает за работу с формой загрузки изображения:
 // открытие/закрытие, сброс полей и валидацию через Pristine
-import { resetEditor } from './image-editor.js';
+import { sendData } from './api.js';
+import { showSuccessMessage, showErrorMessage } from './messages.js';
+import { resetEditor } from './image-editor.js'; // если есть модуль редактора
 
 //элементы формы
 const uploadForm = document.querySelector('.img-upload__form');// сама форма
@@ -26,12 +28,13 @@ const openUploadForm = () => {
 
 //закрытие: прячем окно, снимаем блокировку, сбрасываем форму
 const closeUploadForm = () => {
-  uploadForm.reset();
-  uploadInput.value = '';
+  uploadForm.reset();          // сбрасывает текстовые поля и радио-кнопки
+  uploadInput.value = '';      // очищает input[type=file] (reset() этого не делает!)
   uploadOverlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
+  document.removeEventListener('keydown', onEscKeyDown);
 
-  // Сбрасываем масштаб и эффекты
+  // Сброс масштаба и эффектов (если есть модуль image-editor)
   resetEditor();
 };
 
@@ -93,10 +96,35 @@ uploadCancelButton.addEventListener('click', closeUploadForm);
 //Esc висит на document постоянно и сам решает реагировать ли
 document.addEventListener('keydown', onEscKeyDown);
 
-//Попытка отправить форму
-uploadForm.addEventListener('submit', (event) => {
+// Обработчик отправки формы через AJAX
+uploadForm.addEventListener('submit', async (event) => {
+  event.preventDefault(); // всегда блокируем стандартную отправку
+
+  // Если валидация не прошла то выходим
   if (!pristine.validate()) {
-    event.preventDefault();
+    return;
+  }
+
+  // Блокируем кнопку отправки на время запроса
+  const submitButton = uploadForm.querySelector('.img-upload__submit');
+  submitButton.disabled = true;
+
+  try {
+    // Собираем данные формы в FormData
+    const formData = new FormData(uploadForm);
+
+    // Отправляем на сервер
+    await sendData(formData);
+
+    // Успех — показываем сообщение и закрываем форму
+    showSuccessMessage();
+    closeUploadForm();
+  } catch (error) {
+    // Ошибка — показываем сообщение, форма НЕ закрывается (данные сохраняются)
+    showErrorMessage();
+  } finally {
+    // Разблокируем кнопку в любом случае
+    submitButton.disabled = false;
   }
 });
 

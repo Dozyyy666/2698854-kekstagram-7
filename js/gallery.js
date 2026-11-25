@@ -1,22 +1,25 @@
-// Модуль-связка: создаёт галерею миниатюр и обрабатывает клики по ним
-import { renderPictures } from './render-pictures.js';
 import { openBigPicture } from './big-picture.js';
 
-// Функция создаёт галерею и навешивает обработчики клика на миниатюры
-// Принимает массив объектов фотографий
-const createGallery = (photos) => {
+// Функция инициализирует галерею и настраивает делегирование событий
+const initGallery = (photos) => {
+  const picturesContainer = document.querySelector('.pictures');
 
-  renderPictures(photos);
+  //один обработчик на весь контейнер с миниатюрами
+  picturesContainer.addEventListener('click', (event) => {
+    const pictureElement = event.target.closest('.picture');
 
-  const pictureElements = document.querySelectorAll('.picture');
+    if (!pictureElement) {
+      return;
+    }
 
-  // Для каждой миниатюры добавляем обработчик клика
-  pictureElements.forEach((pictureElement, index) => {
-    pictureElement.addEventListener('click', (event) => {
-      event.preventDefault();
+    event.preventDefault();
+
+    const allPictures = Array.from(picturesContainer.querySelectorAll('.picture'));
+    const index = allPictures.indexOf(pictureElement);
+    if (photos[index]) {
       openBigPicture(photos[index]);
-    });
+    }
   });
 };
 
-export { createGallery };
+export { initGallery };

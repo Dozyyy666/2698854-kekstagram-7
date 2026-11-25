@@ -1,11 +1,27 @@
-// Точка входа в приложение
-import { generatePhotos } from './util.js';
-import { createGallery } from './gallery.js';
+// main.js
+import { getData } from './api.js';
+import { showErrorMessage } from './messages.js';
+import { renderPictures } from './render-pictures.js';
+import { initGallery } from './gallery.js';
 import './upload-form.js';
 import './image-editor.js';
 
-// Генерируем массив фотографий
-const photos = generatePhotos();
+// Функция загрузки и инициализации приложения
+const initApp = async () => {
+  try {
+    // получаем данные с сервера
+    const photos = await getData();
 
-// Создаём галерею с обработчиками клика
-createGallery(photos);
+    // Отрисовываем миниатюры
+    renderPictures(photos);
+
+    //обработчики клика для открытия полноразмерного режима
+    initGallery(photos);
+
+  } catch (error) {
+    showErrorMessage();
+  }
+};
+
+// Запускаем приложение
+initApp();
